@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>週曆排列方式比較 — 三種設計探索</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --surface-2: #f5f3ec;
+  --surface-3: #ebe9e0;
+  --text: #1a1a17;
+  --text-2: #4b4a44;
+  --text-dim: #87867f;
+  --text-faint: #b0afa6;
+  --border: #e4e1d8;
+  --border-2: #d3d0c5;
+  --accent: #4f46e5;
+  --sans: "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* status palette (matches main app) */
+  --st-active: #0d8a36;
+  --st-active-s: #dcf4e3;
+  --st-upcoming: #1e6cff;
+  --st-upcoming-s: #e3edff;
+  --st-booked: #b97309;
+  --st-booked-s: #fcf0d6;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 56px 48px 80px;
+}
+
+/* ===== Header ===== */
+.intro__eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+.intro__title {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  max-width: 880px;
+}
+.intro__lede {
+  font-size: 16px;
+  color: var(--text-2);
+  max-width: 760px;
+  line-height: 1.65;
+  margin: 0;
+}
+.intro__lede strong { color: var(--text); font-weight: 500; }
+
+.problem {
+  margin-top: 36px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.problem__tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 10%, white);
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+.problem__body { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+.problem__body strong { color: var(--text); }
+
+/* ===== Variation block ===== */
+.variation {
+  margin-top: 56px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.var__head {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+.var__badge {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--text);
+  color: var(--surface);
+  display: grid; place-items: center;
+}
+.var__title-block h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.var__sub {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+.var__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.var__tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 4px 9px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  letter-spacing: 0.02em;
+}
+.var__tag.is-pro { background: #e9f7ec; color: #167a3a; border-color: #c8e8d2; }
+.var__tag.is-con { background: #fbe9e5; color: #9d2f1f; border-color: #f0cabf; }
+
+.var__demo {
+  padding: 28px;
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.var__analysis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+.anal {
+  background: var(--surface);
+  padding: 18px 22px 20px;
+}
+.anal__label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.anal__mark {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  display: inline-grid; place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--surface);
+}
+.anal--why  .anal__mark { background: #6b6a64; }
+.anal--pro  .anal__mark { background: var(--st-active); }
+.anal--con  .anal__mark { background: #c43a2a; }
+.anal--ref  .anal__mark { background: var(--accent); }
+
+.anal__list {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex; flex-direction: column;
+  gap: 6px;
+}
+.anal__list li {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.55;
+  padding-left: 14px;
+  position: relative;
+}
+.anal__list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+.anal__list li strong { color: var(--text); font-weight: 500; }
+
+.ref-list { display: flex; flex-direction: column; gap: 8px; }
+.ref-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  font-size: 12.5px;
+}
+.ref-row__name {
+  font-weight: 600;
+  color: var(--text);
+}
+.ref-row__why { color: var(--text-dim); font-size: 11.5px; line-height: 1.4; margin-top: 2px; }
+.ref-row__logo {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--text);
+  color: var(--surface);
+  width: 24px; height: 24px;
+  border-radius: 5px;
+  display: grid; place-items: center;
+  letter-spacing: 0;
+}
+
+/* ===== Shared week-grid structure ===== */
+.wk {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: grid;
+  font-size: 12px;
+}
+
+/* === Variation A: Lanes === */
+.wkA {
+  grid-template-columns: 52px repeat(7, 1fr);
+}
+.wkA__corner, .wkA__hday {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 8px 6px;
+  text-align: center;
+}
+.wkA__hday:last-child { border-right: 0; }
+.wkA__hday-w { font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
+.wkA__hday-d { font-family: var(--mono); font-size: 16px; font-weight: 500; }
+.wkA__gutter {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  position: relative;
+}
+.wkA__hour {
+  height: 48px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: right;
+  padding: 1px 6px 0 0;
+  border-bottom: 1px dashed var(--border);
+}
+.wkA__col {
+  position: relative;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+.wkA__col:last-child { border-right: 0; }
+.wkA__col-bg {
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 47px,
+    var(--border) 47px 48px
+  );
+  pointer-events: none;
+}
+.evtA {
+  position: absolute;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: var(--text);
+  background: var(--s);
+  border-left: 2px solid var(--c);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.evtA__time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+.evtA__name {
+  font-weight: 600;
+  color: var(--c);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evtA__user {
+  font-size: 10px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === Variation B: Tool Swimlanes === */
+.wkB { display: block; }
+.wkB__head {
+  display: grid;
+  grid-template-columns: 110px repeat(7, 1fr);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.wkB__corner { padding: 12px 14px; font-size: 11px; color: var(--text-dim); font-family: var(--mono); border-right: 1px solid var(--border); }
+.wkB__hday {
+  padding: 8px 0;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.wkB__hday:last-child { border-right: 0; }
+.wkB__hday-w { font-size: 10px; color: var(--text-dim); }
+.wkB__hday-d { font-family: var(--mono); font-size: 14px; font-weight: 500; margin-top: 1px; }
+.wkB__row {
+  display: grid;
+  grid-template-columns: 110px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.wkB__row:last-child { border-bottom: 0; }
+.wkB__label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+  font-size: 12px;
+}
+.wkB__logo {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  background: var(--text);
+  color: var(--surface);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.wkB__lname { font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wkB__cell {
+  position: relative;
+  height: 56px;
+  border-right: 1px solid var(--border);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(100% / 9 - 1px),
+    var(--surface-2) calc(100% / 9 - 1px) calc(100% / 9)
+  );
+}
+.wkB__cell:last-child { border-right: 0; }
+.evtB {
+  position: absolute;
+  top: 10px; bottom: 10px;
+  background: var(--s);
+  border-left: 2px solid var(--c);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 10.5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+.evtB__time { font-family: var(--mono); font-size: 9px; color: var(--text-dim); }
+.evtB__user { font-size: 10px; font-weight: 600; color: var(--c); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* === Variation C: Compact Agenda === */
+.wkC {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+.wkC__col {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+.wkC__col:last-child { border-right: 0; }
+.wkC__head {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.wkC__head-l { display: flex; align-items: baseline; gap: 8px; }
+.wkC__week { font-size: 10px; color: var(--text-dim); }
+.wkC__day  { font-family: var(--mono); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+.wkC__count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+.wkC__hours {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 8px 12px 6px;
+  height: 22px;
+}
+.wkC__hbar {
+  flex: 1;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--surface-2);
+  position: relative;
+}
+.wkC__hbar.is-on {
+  background: var(--c, var(--st-upcoming));
+  opacity: var(--op, 1);
+}
+.wkC__hlbl {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--text-faint);
+  padding: 0 12px 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.wkC__list {
+  padding: 4px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.evtC {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--s);
+  border-radius: 5px;
+  border-left: 2px solid var(--c);
+}
+.evtC__time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-2);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.evtC__body { min-width: 0; }
+.evtC__name {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600;
+  color: var(--c);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.evtC__logo {
+  width: 13px; height: 13px;
+  border-radius: 3px;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 9px;
+  font-family: var(--mono);
+  display: inline-grid; place-items: center;
+  flex-shrink: 0;
+}
+.evtC__user {
+  font-size: 10.5px; color: var(--text-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.evtC__dur {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--text-dim);
+}
+.wkC__empty {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  padding: 14px 0;
+}
+
+/* Status palette helper classes */
+.st-active   { --c: var(--st-active);   --s: var(--st-active-s); }
+.st-upcoming { --c: var(--st-upcoming); --s: var(--st-upcoming-s); }
+.st-booked   { --c: var(--st-booked);   --s: var(--st-booked-s); }
+
+/* ===== Final comparison table ===== */
+.compare {
+  margin-top: 56px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.compare__head {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.compare__head h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.compare__head p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.compare__tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare__tbl th, .compare__tbl td {
+  padding: 14px 22px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.compare__tbl th {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  width: 18%;
+}
+.compare__tbl thead th { width: auto; }
+.compare__tbl tbody tr:last-child td { border-bottom: 0; }
+.compare__head-cell {
+  display: flex; align-items: center; gap: 8px;
+}
+.compare__head-cell span {
+  font-family: var(--mono);
+  font-size: 11px;
+  width: 22px; height: 22px;
+  background: var(--text); color: var(--surface);
+  border-radius: 5px;
+  display: grid; place-items: center;
+  font-weight: 600;
+}
+.score {
+  display: inline-flex;
+  gap: 2px;
+}
+.score__pip {
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+.score__pip.is-on { background: var(--text); }
+.cell-note {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ===== Recommendation ===== */
+.reco {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.reco__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.reco__card h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 8px;
+}
+.reco__card h4 span {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--text); color: var(--surface);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-weight: 600;
+}
+.reco__card p {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.foot {
+  margin-top: 60px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+// === Sample data: one week, designed to expose layout strengths/weaknesses ===
+const TOOLS = [
+  { id: "chatgpt",    name: "ChatGPT Team",  glyph: "G" },
+  { id: "claude",     name: "Claude Pro",     glyph: "C" },
+  { id: "midjourney", name: "Midjourney",     glyph: "M" },
+  { id: "cursor",     name: "Cursor Pro",     glyph: "U" },
+  { id: "copilot",    name: "Copilot",        glyph: "H" },
+  { id: "gemini",     name: "Gemini",         glyph: "N" },
+];
+
+const DAYS = ["週一","週二","週三","週四","週五","週六","週日"];
+const DATES = [18, 19, 20, 21, 22, 23, 24];
+const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17];
+const HOUR_COUNT = HOURS.length;
+
+// Designed sample bookings — covers easy, medium, conflict-heavy days.
+const SB = [
+  // 週一 — light
+  { day: 0, start: 9,  end: 12, tool: "chatgpt",    user: "陳", status: "upcoming" },
+  { day: 0, start: 14, end: 17, tool: "cursor",     user: "王", status: "upcoming" },
+  // 週二 — moderate (2 overlap 10-12)
+  { day: 1, start: 9,  end: 11, tool: "claude",     user: "林", status: "upcoming" },
+  { day: 1, start: 10, end: 14, tool: "midjourney", user: "張", status: "upcoming" },
+  { day: 1, start: 13, end: 16, tool: "copilot",    user: "黃", status: "upcoming" },
+  // 週三 — TODAY, conflict-heavy (4 overlap 14-15)
+  { day: 2, start: 9,  end: 18, tool: "copilot",    user: "黃", status: "active" },
+  { day: 2, start: 10, end: 12, tool: "chatgpt",    user: "陳", status: "active" },
+  { day: 2, start: 11, end: 14, tool: "claude",     user: "林", status: "active" },
+  { day: 2, start: 13, end: 15, tool: "midjourney", user: "張", status: "active" },
+  { day: 2, start: 14, end: 17, tool: "cursor",     user: "王", status: "active" },
+  { day: 2, start: 14, end: 16, tool: "gemini",     user: "周", status: "active" },
+  // 週四 — moderate, with short and long sessions
+  { day: 3, start: 9,  end: 10, tool: "chatgpt",    user: "李", status: "booked" },
+  { day: 3, start: 10, end: 16, tool: "claude",     user: "黃", status: "booked" },
+  { day: 3, start: 13, end: 14, tool: "gemini",     user: "周", status: "booked" },
+  // 週五 — moderate
+  { day: 4, start: 9,  end: 12, tool: "cursor",     user: "王", status: "booked" },
+  { day: 4, start: 14, end: 18, tool: "chatgpt",    user: "陳", status: "booked" },
+  { day: 4, start: 13, end: 16, tool: "midjourney", user: "張", status: "booked" },
+  // 週六/週日 — sparse
+  { day: 5, start: 10, end: 12, tool: "claude",     user: "李", status: "booked" },
+  { day: 6, start: 14, end: 16, tool: "chatgpt",    user: "陳", status: "booked" },
+];
+
+const toolById = Object.fromEntries(TOOLS.map(t => [t.id, t]));
+
+// Helpers
+function laneAssign(events) {
+  // Sort by start. Assign each event to the earliest lane whose last event ended before this starts.
+  const sorted = events.slice().sort((a, b) => a.start - b.start || b.end - a.end);
+  const lanes = []; // each lane = last end hour
+  return sorted.map(e => {
+    let li = lanes.findIndex(end => end <= e.start);
+    if (li === -1) { lanes.push(e.end); li = lanes.length - 1; }
+    else lanes[li] = e.end;
+    return { ...e, lane: li, totalLanes: lanes.length };
+  }).map((e, _, arr) => ({ ...e, totalLanes: Math.max(...arr.map(x => x.lane + 1)) }));
+}
+
+// ============ Variation A: Lanes (Google Calendar style) ============
+function WeekViewA() {
+  const HOUR_PX = 48;
+  return (
+    <div className="wk wkA">
+      <div className="wkA__corner" />
+      {DAYS.map((d, i) => (
+        <div key={i} className="wkA__hday">
+          <div className="wkA__hday-w">{d}</div>
+          <div className="wkA__hday-d">{DATES[i]}</div>
+        </div>
+      ))}
+      <div className="wkA__gutter">
+        {HOURS.map(h => <div key={h} className="wkA__hour">{String(h).padStart(2,"0")}:00</div>)}
+      </div>
+      {DAYS.map((_, di) => {
+        const dayEvents = SB.filter(b => b.day === di);
+        const placed = laneAssign(dayEvents);
+        return (
+          <div key={di} className="wkA__col" style={{ height: `${HOURS.length * HOUR_PX}px` }}>
+            <div className="wkA__col-bg" />
+            {placed.map((e, ei) => {
+              const tool = toolById[e.tool];
+              const top = (e.start - 9) * HOUR_PX;
+              const height = (e.end - e.start) * HOUR_PX - 2;
+              const width = `calc((100% - 4px) / ${e.totalLanes})`;
+              const left = `calc(${e.lane} * (100% - 4px) / ${e.totalLanes} + 2px)`;
+              return (
+                <div key={ei}
+                  className={`evtA st-${e.status}`}
+                  style={{ top, height, width, left }}
+                >
+                  <div className="evtA__time">{String(e.start).padStart(2,"0")}–{String(e.end).padStart(2,"0")}</div>
+                  <div className="evtA__name">{tool.name}</div>
+                  {height > 38 && <div className="evtA__user">{e.user}</div>}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============ Variation B: Tool Swimlanes ============
+function WeekViewB() {
+  return (
+    <div className="wk wkB">
+      <div className="wkB__head">
+        <div className="wkB__corner">AI 工具 ↓ / 日期 →</div>
+        {DAYS.map((d, i) => (
+          <div key={i} className="wkB__hday">
+            <div className="wkB__hday-w">{d}</div>
+            <div className="wkB__hday-d">{DATES[i]}</div>
+          </div>
+        ))}
+      </div>
+      {TOOLS.map(tool => (
+        <div key={tool.id} className="wkB__row">
+          <div className="wkB__label">
+            <span className="wkB__logo">{tool.glyph}</span>
+            <span className="wkB__lname">{tool.name}</span>
+          </div>
+          {DAYS.map((_, di) => {
+            const cellEvents = SB.filter(b => b.day === di && b.tool === tool.id);
+            return (
+              <div key={di} className="wkB__cell">
+                {cellEvents.map((e, ei) => {
+                  const leftPct = ((e.start - 9) / HOUR_COUNT) * 100;
+                  const widthPct = ((e.end - e.start) / HOUR_COUNT) * 100;
+                  return (
+                    <div key={ei}
+                      className={`evtB st-${e.status}`}
+                      style={{ left: `${leftPct}%`, width: `calc(${widthPct}% - 2px)` }}
+                    >
+                      <div className="evtB__time">{String(e.start).padStart(2,"0")}–{String(e.end).padStart(2,"0")}</div>
+                      <div className="evtB__user">{e.user}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============ Variation C: Compact Agenda ============
+function WeekViewC() {
+  // For each day: build hour-coverage bar + sorted list of bookings.
+  return (
+    <div className="wk wkC">
+      {DAYS.map((d, di) => {
+        const events = SB.filter(b => b.day === di).sort((a, b) => a.start - b.start);
+        // Coverage by hour — count of overlapping bookings.
+        const coverage = HOURS.map(h => events.filter(e => e.start <= h && e.end > h).length);
+        const maxCov = Math.max(1, ...coverage);
+        return (
+          <div key={di} className="wkC__col">
+            <div className="wkC__head">
+              <div className="wkC__head-l">
+                <span className="wkC__week">{d}</span>
+                <span className="wkC__day">{DATES[di]}</span>
+              </div>
+              <span className="wkC__count">{events.length} 筆</span>
+            </div>
+            <div className="wkC__hours">
+              {coverage.map((c, hi) => {
+                const op = c === 0 ? 0.18 : (0.4 + 0.6 * (c / maxCov));
+                return (
+                  <span key={hi}
+                    className={c > 0 ? "wkC__hbar is-on" : "wkC__hbar"}
+                    style={{
+                      "--c": di === 2 ? "var(--st-active)" : di < 2 ? "var(--st-upcoming)" : "var(--st-booked)",
+                      "--op": op,
+                    }}
+                    title={`${HOURS[hi]}:00 · ${c} 筆`}
+                  />
+                );
+              })}
+            </div>
+            <div className="wkC__hlbl"><span>9</span><span>13</span><span>18</span></div>
+            <div className="wkC__list">
+              {events.length === 0 ? (
+                <div className="wkC__empty">無預約</div>
+              ) : events.map((e, ei) => {
+                const tool = toolById[e.tool];
+                const dur = e.end - e.start;
+                return (
+                  <div key={ei} className={`evtC st-${e.status}`}>
+                    <div className="evtC__time">
+                      <div>{String(e.start).padStart(2,"0")}</div>
+                      <div style={{ color: "var(--text-faint)" }}>{String(e.end).padStart(2,"0")}</div>
+                    </div>
+                    <div className="evtC__body">
+                      <div className="evtC__name">
+                        <span className="evtC__logo">{tool.glyph}</span>
+                        {tool.name}
+                      </div>
+                      <div className="evtC__user">{e.user}</div>
+                    </div>
+                    <div className="evtC__dur">{dur}h</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============ Variation block wrapper ============
+function Variation({ badge, title, sub, tags, why, pros, cons, refs, children }) {
+  return (
+    <section className="variation">
+      <header className="var__head">
+        <div className="var__badge">{badge}</div>
+        <div className="var__title-block">
+          <h2>{title}</h2>
+          <div className="var__sub">{sub}</div>
+        </div>
+        <div className="var__tags">
+          {tags.map((t, i) => (
+            <span key={i} className={`var__tag is-${t.kind}`}>{t.text}</span>
+          ))}
+        </div>
+      </header>
+
+      <div className="var__demo">{children}</div>
+
+      <div className="var__analysis">
+        <div className="anal anal--why">
+          <div className="anal__label"><span className="anal__mark">i</span> 設計原因</div>
+          <ul className="anal__list">
+            {why.map((s, i) => <li key={i} dangerouslySetInnerHTML={{ __html: s }} />)}
+          </ul>
+        </div>
+        <div className="anal anal--pro">
+          <div className="anal__label"><span className="anal__mark">✓</span> 優點</div>
+          <ul className="anal__list">
+            {pros.map((s, i) => <li key={i} dangerouslySetInnerHTML={{ __html: s }} />)}
+          </ul>
+        </div>
+        <div className="anal anal--con">
+          <div className="anal__label"><span className="anal__mark">✗</span> 缺點</div>
+          <ul className="anal__list">
+            {cons.map((s, i) => <li key={i} dangerouslySetInnerHTML={{ __html: s }} />)}
+          </ul>
+        </div>
+        <div className="anal anal--ref">
+          <div className="anal__label"><span className="anal__mark">◇</span> 競品參考</div>
+          <div className="ref-list">
+            {refs.map((r, i) => (
+              <div key={i} className="ref-row">
+                <span className="ref-row__logo">{r.glyph}</span>
+                <div>
+                  <div className="ref-row__name">{r.name}</div>
+                  <div className="ref-row__why">{r.why}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Score({ n }) {
+  return (
+    <span className="score">
+      {[0,1,2,3,4].map(i => <span key={i} className={i < n ? "score__pip is-on" : "score__pip"} />)}
+    </span>
+  );
+}
+
+function App() {
+  return (
+    <div className="page">
+      <header>
+        <div className="intro__eyebrow">Week View · Layout Exploration</div>
+        <h1 className="intro__title">週曆排列方式比較</h1>
+        <p className="intro__lede">
+          目前週曆採用<strong>同欄堆疊式</strong>，當一天有 4–5 筆重疊預約時，後排卡片
+          被遮擋、文字截斷、滑鼠 hover 才看得到內容 — 易讀性低於可接受門檻。
+          以下提出三種主流排列方式，各自有清晰的使用情境與權衡。
+        </p>
+
+        <div className="problem">
+          <span className="problem__tag">Problem</span>
+          <div className="problem__body">
+            <strong>使用情境的密度差異大：</strong>
+            清淡日只有 1–2 筆預約，繁忙日（如週三 demo data）卻可達 6 筆同時重疊。
+            單一排列方式很難在「鬆/緊」兩端都表現好，需要根據主要使用情境權衡。
+          </div>
+        </div>
+      </header>
+
+      {/* === A === */}
+      <Variation
+        badge="A"
+        title="並列分欄 / Side-by-side Lanes"
+        sub="GOOGLE CALENDAR · APPLE CALENDAR · OUTLOOK"
+        tags={[
+          { kind: "neutral", text: "業界標準" },
+          { kind: "pro", text: "全部事件可見" },
+          { kind: "con", text: "衝突多時極窄" },
+        ]}
+        why={[
+          "<strong>時間軸保真：</strong>Y 軸＝時間，事件高度＝時長，視覺上等比例，符合「行程＝時間佔用」的心智模型。",
+          "<strong>沒有資訊被遮擋：</strong>所有同時段事件都並排出現，使用者不需 hover 或點擊就能掃描。",
+          "<strong>學習成本最低：</strong>幾乎所有人都用過 Google Calendar，無需訓練。",
+        ]}
+        pros={[
+          "完整呈現時長 — 1 小時和 4 小時的事件視覺差距明顯。",
+          "點擊命中區大、無遮擋。",
+          "每張卡平等存在，不會誤導使用者「某張比較重要」。",
+        ]}
+        cons={[
+          "<strong>衝突多時極窄 (≥4 筆)：</strong>看週三 — 6 欄並排，每欄不到 40px，工具名稱被截斷成「ChatG…」。",
+          "9–18 小時的縱向高度需 ≥ 432px，行動裝置上需大量捲動。",
+          "「誰用了哪些工具」需要逐欄掃讀，無法一眼判斷。",
+        ]}
+        refs={[
+          { glyph: "G", name: "Google Calendar", why: "週/日視圖的標準典範；overflow 時自動疊縮成 +N more。" },
+          { glyph: "", name: "Apple Calendar", why: "macOS/iOS 內建；半透明配色處理顏色衝突。" },
+          { glyph: "O", name: "Outlook Web", why: "企業情境最常見；可關閉週末欄位節省空間。" },
+        ]}
+      >
+        <WeekViewA />
+      </Variation>
+
+      {/* === B === */}
+      <Variation
+        badge="B"
+        title="資源泳道 / Tool Swimlanes"
+        sub="TOGGL PLAN · ASANA TIMELINE · RESOURCE GURU · MONDAY"
+        tags={[
+          { kind: "neutral", text: "資源預約最佳" },
+          { kind: "pro", text: "資源衝突一目瞭然" },
+          { kind: "con", text: "失去個人時間軸" },
+        ]}
+        why={[
+          "<strong>以資源為主視角：</strong>每個 AI 工具一條 row，立即看出哪個工具被預約、哪些時段空閒，符合「我要找 Cursor 何時有空」的查找路徑。",
+          "<strong>無重疊問題：</strong>同工具同時段才會擠在一起 — 而那本來就應該被防止（座位數限制）。",
+          "<strong>對「座位／配額」型資源的最佳呈現：</strong>會議室、共用裝置、訂閱席次都採此模式。",
+        ]}
+        pros={[
+          "完全消除「視覺打架」— 不同工具的預約永遠分開。",
+          "資源使用率視覺化：每條 row 的填滿密度＝該工具的熱度。",
+          "查找路徑優化：從「我要用某工具」直接找到 row 的空隙。",
+        ]}
+        cons={[
+          "<strong>失去使用者個人時間軸：</strong>使用者要看「我今天有什麼」必須掃讀 8 條 row 找自己。",
+          "工具多時（>10）縱向變長，水平方向時間被壓縮。",
+          "短時段（1h）在 7 天寬度下變極小色塊，難閱讀。",
+        ]}
+        refs={[
+          { glyph: "T", name: "Toggl Plan", why: "Resource scheduling 標準作法；row = 人/資源，column = 日期。" },
+          { glyph: "A", name: "Asana Timeline", why: "Project view 以任務 owner 為 row，gantt 條跨多日。" },
+          { glyph: "R", name: "Resource Guru", why: "Booking 系統典範，正是「會議室/設備」預約這個情境。" },
+          { glyph: "M", name: "Monday.com", why: "Workload view 以人為 row、日期為 column。" },
+        ]}
+      >
+        <WeekViewB />
+      </Variation>
+
+      {/* === C === */}
+      <Variation
+        badge="C"
+        title="時段聚合條列 / Compact Agenda"
+        sub="NOTION CALENDAR · CRON · FANTASTICAL"
+        tags={[
+          { kind: "neutral", text: "高密度可讀" },
+          { kind: "pro", text: "文字永遠完整" },
+          { kind: "con", text: "失去時間比例" },
+        ]}
+        why={[
+          "<strong>對「行程＝任務清單」的心智模型：</strong>每天一欄、每筆一列，像 to-do list 一樣讀。",
+          "<strong>頂部 9–18h 條形圖：</strong>用色塊密度替代「時間刻度」，一眼看出哪天忙、哪天閒，不浪費版面。",
+          "<strong>文字永遠完整：</strong>不管多少筆，每筆都有固定高度，工具名/使用者完整顯示。",
+        ]}
+        pros={[
+          "繁忙日仍易讀 — 6 筆並排不會被壓扁。",
+          "資訊密度高，整週概覽不需捲動。",
+          "對行動裝置友善，可垂直堆疊。",
+        ]}
+        cons={[
+          "<strong>失去視覺時長感：</strong>1h 和 4h 的事件外觀一樣，得讀「Xh」標籤。",
+          "事件「同時發生」這件事消失了 — 兩個 14:00 的事件看起來就是兩筆並列。",
+          "對「我下午 3 點空不空」這類問題不直接，要點開細看。",
+        ]}
+        refs={[
+          { glyph: "N", name: "Notion Calendar (Cron)", why: "Week view 在 compact 模式下接近此排法。" },
+          { glyph: "F", name: "Fantastical", why: "Agenda 視圖以日期為欄、列出當日所有事件。" },
+          { glyph: "L", name: "Linear Cycles", why: "以週為單位的任務 list，每天一個分組標題。" },
+          { glyph: "S", name: "Superhuman", why: "Inbox 風格的時間排程，density-first。" },
+        ]}
+      >
+        <WeekViewC />
+      </Variation>
+
+      {/* === Comparison Table === */}
+      <section className="compare">
+        <header className="compare__head">
+          <h2>三方案橫向比較</h2>
+          <p>5 個維度，越多色塊代表表現越好（5 為最高）。</p>
+        </header>
+        <table className="compare__tbl">
+          <thead>
+            <tr>
+              <th>維度</th>
+              <th><div className="compare__head-cell"><span>A</span>並列分欄</div></th>
+              <th><div className="compare__head-cell"><span>B</span>資源泳道</div></th>
+              <th><div className="compare__head-cell"><span>C</span>時段聚合</div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>易讀性（衝突多時）</th>
+              <td><Score n={2} /><div className="cell-note">≥4 筆並列時嚴重壓縮</div></td>
+              <td><Score n={5} /><div className="cell-note">永不重疊</div></td>
+              <td><Score n={5} /><div className="cell-note">固定高度永遠完整</div></td>
+            </tr>
+            <tr>
+              <th>時間比例感</th>
+              <td><Score n={5} /><div className="cell-note">事件高度＝時長</div></td>
+              <td><Score n={4} /><div className="cell-note">寬度＝時長，短時段難讀</div></td>
+              <td><Score n={1} /><div className="cell-note">文字標籤承擔，無比例</div></td>
+            </tr>
+            <tr>
+              <th>查「個人」的便利</th>
+              <td><Score n={4} /></td>
+              <td><Score n={2} /><div className="cell-note">需掃讀所有 row</div></td>
+              <td><Score n={5} /></td>
+            </tr>
+            <tr>
+              <th>查「工具」的便利</th>
+              <td><Score n={2} /></td>
+              <td><Score n={5} /><div className="cell-note">每工具一條 row</div></td>
+              <td><Score n={3} /></td>
+            </tr>
+            <tr>
+              <th>整體密度／空間效率</th>
+              <td><Score n={3} /></td>
+              <td><Score n={3} /></td>
+              <td><Score n={5} /></td>
+            </tr>
+            <tr>
+              <th>學習成本</th>
+              <td><Score n={5} /><div className="cell-note">幾乎人人會用</div></td>
+              <td><Score n={3} /></td>
+              <td><Score n={4} /></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div className="reco">
+        <div className="reco__card">
+          <h4><span>A</span> 適用情境</h4>
+          <p>使用者主要關心「我這週的時間安排」，且預約密度多在 ≤3 筆/同時段。對新用戶最友善。</p>
+        </div>
+        <div className="reco__card">
+          <h4><span>B</span> 適用情境</h4>
+          <p>工具/資源是稀缺品（席次少），管理員要安排調度。AI 工具預約 <strong>正是此情境</strong> — 是強力候選。</p>
+        </div>
+        <div className="reco__card">
+          <h4><span>C</span> 適用情境</h4>
+          <p>密度極高、跨多日掃讀為主、行動裝置佔比高。可作為 mobile/compact 模式使用。</p>
+        </div>
+      </div>
+
+      <div className="reco" style={{ marginTop: 16 }}>
+        <div className="reco__card" style={{ gridColumn: "1 / -1", background: "var(--surface-2)" }}>
+          <h4><span style={{ background: "var(--accent)" }}>★</span> 建議方向</h4>
+          <p>
+            因產品定位是「<strong>AI 工具席次預約</strong>」，<strong>方案 B（資源泳道）</strong>最契合核心使用情境 — 
+            使用者主要決策是「我要用 XX 工具」，需要快速找空檔。建議將 B 設為週視圖預設，並提供 A 作為「我的視角」切換選項，
+            讓重度個人排程者也能切換。C 作為 compact density 模式或行動裝置版本。
+          </p>
+        </div>
+      </div>
+
+      <div className="foot">AI 工具預約使用登記 · 週視圖排列方式比較探索</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
