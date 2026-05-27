@@ -76,6 +76,12 @@ function DayDetail({ dateKey, bookings, tools, users, today, onClose, onSelectBo
                         <span className="day-row__role">· {user.role}</span>
                       </div>
                       {b.note && <div className="day-row__note">{b.note}</div>}
+                      {(b.checkInTime || b.checkOutTime) && (
+                        <div className="day-row__checkin">
+                          {b.checkInTime  && <span>↑ {b.checkInTime}</span>}
+                          {b.checkOutTime && <span>↓ {b.checkOutTime}</span>}
+                        </div>
+                      )}
                     </div>
                     <div className="day-row__status">
                       <span className="day-row__chip" style={{ color: res.color, background: `color-mix(in oklab, ${res.dot} 14%, white)` }}>
