@@ -54,6 +54,7 @@ function App() {
               tools: new Set([...prev.tools, ...t.map((x) => x.id)]),
               users: new Set([...prev.users, ...u.map((x) => x.id)]),
             }));
+            setCurrentUserId((prev) => u.find((x) => x.id === prev) ? prev : (u[0]?.id || prev));
             setDbLoaded(true);
           },
           (err) => setDbError(err)
@@ -65,6 +66,8 @@ function App() {
 
   const filtered = useMemo3(() =>
     bookings.filter((b) =>
+      tools.some((t) => t.id === b.toolId) &&
+      users.some((u) => u.id === b.userId) &&
       filters.tools.has(b.toolId) &&
       filters.users.has(b.userId) &&
       filters.resStatus.has(b.resStatus) &&
@@ -149,7 +152,7 @@ function App() {
         filters={filters} setFilters={setFilters} today={TODAY}
         topContent={
           <CheckInPanel
-            users={users} tools={tools} bookings={bookings}
+            users={users} tools={tools} bookings={liveBookings}
             today={TODAY} currentHour={currentHour}
             currentUserId={currentUserId} setCurrentUserId={setCurrentUserId}
             onCheckIn={onCheckIn} onCheckOut={onCheckOut}
