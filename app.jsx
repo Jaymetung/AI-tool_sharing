@@ -32,6 +32,9 @@ function App() {
   const [currentUserId, setCurrentUserId] = useState2(SEED_USERS[0]?.id || "u1");
   const [currentHour, setCurrentHour] = useState2(new Date().getHours() || 14);
   const [adminModal, setAdminModal] = useState2(null);
+  const [adminAuthed, setAdminAuthed] = useState2(false);
+  const [adminGate, setAdminGate] = useState2(false);
+  const [adminPassword, setAdminPassword] = useState2("admin");
 
   const [filters, setFilters] = useState2({
     tools: new Set(SEED_TOOLS.map((t) => t.id)),
@@ -45,7 +48,7 @@ function App() {
     fbSeedIfEmpty(SEED_TOOLS, SEED_USERS, SEED_BOOKINGS)
       .then(() => {
         unsub = fbSubscribe(
-          ({ tools: t, users: u, bookings: b }) => {
+          ({ tools: t, users: u, bookings: b, config: c }) => {
             setTools(t);
             setUsers(u);
             setBookings(b);
@@ -55,6 +58,7 @@ function App() {
               users: new Set([...prev.users, ...u.map((x) => x.id)]),
             }));
             setCurrentUserId((prev) => u.find((x) => x.id === prev) ? prev : (u[0]?.id || prev));
+            if (c.adminPassword) setAdminPassword(c.adminPassword);
             setDbLoaded(true);
           },
           (err) => setDbError(err)
@@ -200,7 +204,7 @@ function App() {
                 <button className={view === "week"  ? "is-on" : ""} onClick={() => setView("week")}>週</button>
               </div>
             )}
-            <button className="btn btn--ghost btn--sm" onClick={() => setAdminModal("tool")} title="管理工具與使用者">⚙ 管理</button>
+            <button className="btn btn--ghost btn--sm" onClick={() => adminAuthed ? setAdminModal("tool") : setAdminGate(true)} title="管理工具與使用者">⚙ 管理</button>
             <button className="btn btn--primary" onClick={() => onCreate(window.AI_DATA.ymd(TODAY), 10)}>
               <span className="btn__plus">＋</span> 新增預約
             </button>
@@ -258,6 +262,14 @@ function App() {
           onClose={() => setDayDetail(null)}
           onSelectBooking={(b) => setModal({ booking: b })}
           onCreate={onCreate} />
+      )}
+
+      {adminGate && (
+        <PasswordGate
+          adminPassword={adminPassword}
+          onSuccess={() => { setAdminAuthed(true); setAdminGate(false); setAdminModal("tool"); }}
+          onClose={() => setAdminGate(false)}
+        />
       )}
 
       {adminModal && (
