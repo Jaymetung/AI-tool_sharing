@@ -120,8 +120,9 @@ function App() {
   const onSave   = (b)  => { fbSaveBooking(b);   setModal(null); };
   const onDelete = (id) => { fbDeleteBooking(id); setModal(null); };
 
-  const onCheckIn  = (id) => { const b = bookings.find((x) => x.id === id); if (b) fbSaveBooking({ ...b, manualState: "in" });  };
-  const onCheckOut = (id) => { const b = bookings.find((x) => x.id === id); if (b) fbSaveBooking({ ...b, manualState: "out" }); };
+  const nowHHMM = () => { const n = new Date(); return `${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`; };
+  const onCheckIn  = (id) => { const b = bookings.find((x) => x.id === id); if (b) fbSaveBooking({ ...b, manualState: "in",  checkInTime:  nowHHMM(), checkOutTime: b.checkOutTime  ?? null }); };
+  const onCheckOut = (id) => { const b = bookings.find((x) => x.id === id); if (b) fbSaveBooking({ ...b, manualState: "out", checkOutTime: nowHHMM(), checkInTime:  b.checkInTime  ?? null }); };
 
   const showDashboard = tweaks.showDashboard && mode === "calendar" && view === "month";
 
@@ -163,6 +164,7 @@ function App() {
             today={TODAY} currentHour={currentHour}
             currentUserId={currentUserId} setCurrentUserId={setCurrentUserId}
             onCheckIn={onCheckIn} onCheckOut={onCheckOut}
+            onCreate={() => onCreate(window.AI_DATA.ymd(TODAY), 10)}
           />
         }
       />
