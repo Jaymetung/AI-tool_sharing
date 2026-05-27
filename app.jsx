@@ -249,7 +249,7 @@ function App() {
       {modal && (
         <BookingModal booking={modal.booking} defaultDate={modal.defaultDate}
           defaultHour={modal.defaultHour} defaultToolId={modal.defaultToolId}
-          tools={tools} users={users}
+          tools={tools} users={users} bookings={liveBookings}
           onClose={() => setModal(null)} onSave={onSave} onDelete={onDelete} />
       )}
 
@@ -261,7 +261,7 @@ function App() {
       )}
 
       {adminModal && (
-        <AdminPanel tools={tools} users={users} initialTab={adminModal}
+        <AdminPanel tools={tools} users={users} bookings={liveBookings} initialTab={adminModal}
           onClose={() => setAdminModal(null)}
           onSaveTool={fbSaveTool}   onDeleteTool={fbDeleteTool}
           onSaveUser={fbSaveUser}   onDeleteUser={fbDeleteUser} />
