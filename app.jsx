@@ -35,6 +35,7 @@ function App() {
   const [adminAuthed, setAdminAuthed] = useState2(false);
   const [adminGate, setAdminGate] = useState2(false);
   const [adminPassword, setAdminPassword] = useState2("admin");
+  const [sidebarOpen, setSidebarOpen] = useState2(false);
 
   const [filters, setFilters] = useState2({
     tools: new Set(SEED_TOOLS.map((t) => t.id)),
@@ -151,9 +152,11 @@ function App() {
   // ── Main UI ────────────────────────────────────────────────────────────────
   return (
     <div className={`app density-${tweaks.density} ${showDashboard ? "" : "no-dash"}`} style={{ "--accent": tweaks.accent }}>
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
       <FilterSidebar
         tools={tools} users={users}
         filters={filters} setFilters={setFilters} today={TODAY}
+        isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}
         topContent={
           <CheckInPanel
             users={users} tools={tools} bookings={liveBookings}
@@ -167,7 +170,8 @@ function App() {
       <main className="main">
         <header className="topbar">
           <div className="topbar__left">
-            <div className="mode-tabs">
+            <button className="hamburger" onClick={() => setSidebarOpen(true)} aria-label="篩選">☰</button>
+          <div className="mode-tabs">
               <button className={mode === "calendar" ? "is-on" : ""} onClick={() => setMode("calendar")}>
                 <span className="mode-tabs__ic">▦</span> 月曆
               </button>
