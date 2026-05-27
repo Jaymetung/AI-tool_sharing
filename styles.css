@@ -75,6 +75,119 @@ button { font-family: inherit; }
   .sidebar { padding: 14px 10px 24px; }
 }
 
+/* ── Mobile (≤768px) ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* App: single column — sidebar becomes a drawer */
+  .app, .app:not(.no-dash), .app.no-dash {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .dashboard { display: none !important; }
+  .main { border: none; }
+
+  /* Sidebar drawer */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: min(300px, 82vw);
+    height: 100dvh;
+    z-index: 60;
+    transform: translateX(-105%);
+    transition: transform .24s ease;
+    box-shadow: none;
+    padding: 16px 12px 24px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+    box-shadow: 6px 0 32px rgba(0,0,0,.18);
+  }
+  .sidebar__close {
+    display: flex;
+  }
+
+  /* Overlay */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 59;
+    backdrop-filter: blur(1px);
+  }
+
+  /* Hamburger visible */
+  .hamburger { display: flex; }
+
+  /* Topbar — single row compact layout */
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+    padding: 8px 10px;
+    gap: 6px;
+    align-items: center;
+  }
+  .topbar__center { display: none; }
+  .topbar__left { gap: 4px; overflow: hidden; }
+  .topbar__right { gap: 4px; }
+  .topbar__title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+  .topbar__divider { display: none; }
+  .mode-tabs button { padding: 5px 8px; font-size: 12px; }
+  .mode-tabs .mode-tabs__ic { display: none; }
+  .seg button { padding: 5px 8px; font-size: 12px; }
+
+  /* "管理" and "新增" buttons compact */
+  .topbar__right .btn--ghost { display: none; }
+  .topbar__right .btn--primary .btn__plus { margin-right: 2px; }
+
+  /* Nav buttons */
+  .iconbtn { width: 30px; height: 30px; font-size: 16px; }
+
+  /* Calendar month — keep 7 cols but compress */
+  .cal-month__cell { min-height: 52px; padding: 2px 2px 3px; }
+  .cal-month__hday { font-size: 9px; padding: 5px 0; letter-spacing: 0; }
+  .cal-month__num  { font-size: 11px; margin-bottom: 1px; }
+
+  /* Chips: hide text on mobile, just show coloured dots */
+  .mchip { padding: 1px 3px; gap: 2px; font-size: 0; line-height: 1; border-radius: 3px; min-height: 6px; }
+  .mchip__dot { width: 6px; height: 6px; flex-shrink: 0; }
+  .mchip__logo, .mchip__name, .mchip__seats { display: none; }
+
+  /* Tool bar in month cell — still shows */
+  .mbar { height: 3px; }
+
+  /* Week view — horizontal scroll */
+  .cal-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cal-week  { min-width: 560px; }
+  .swim-wrap { min-width: 540px; }
+
+  /* Legend — stack */
+  .legend { flex-direction: column; gap: 6px; padding: 8px 12px; }
+  .legend__group { flex-wrap: wrap; gap: 4px; }
+
+  /* Modals — full-width with small margin */
+  .modal { max-width: calc(100vw - 16px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .day-detail { width: calc(100vw - 16px); max-height: calc(100dvh - 24px); }
+  .modal__body { padding: 12px; gap: 12px; }
+  .field-grid { grid-template-columns: 1fr; gap: 10px; }
+  .tool-grid { grid-template-columns: 1fr; }
+
+  /* Admin panel */
+  .admin-modal { width: calc(100vw - 16px); }
+  .admin-tabs { flex-wrap: wrap; padding: 0 12px; }
+  .admin-tabs button { padding: 8px 12px; font-size: 12px; }
+
+  /* Stats */
+  .stats__tiles { grid-template-columns: repeat(2, 1fr); }
+  .dual { grid-template-columns: 1fr !important; }
+}
+
+/* ── Extra small (≤400px) ────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .cal-month__cell { min-height: 44px; }
+  .topbar__title { display: none; }
+  .modal { max-width: calc(100vw - 8px); }
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -94,6 +207,44 @@ button { font-family: inherit; }
   overflow-y: auto;
   border-right: 0;
 }
+/* Hamburger — hidden on desktop, shown on mobile via media query */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--text);
+  transition: background .12s;
+}
+.hamburger:hover { background: var(--surface-2); }
+
+/* Sidebar close button — hidden on desktop */
+.sidebar__close {
+  display: none;
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.sidebar__close:hover { color: var(--text); background: var(--surface-2); }
+
+.sidebar { position: relative; }
+
+.sidebar-overlay { display: none; }
+
 .sidebar__brand {
   display: flex;
   align-items: center;
