@@ -75,6 +75,43 @@ button { font-family: inherit; }
   .sidebar { padding: 14px 10px 24px; }
 }
 
+/* Hamburger button — hidden on desktop, revealed by mobile media query */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--text);
+  transition: background .12s;
+}
+.hamburger:hover { background: var(--surface-2); }
+
+/* Sidebar close button — hidden on desktop */
+.sidebar__close {
+  display: none;
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.sidebar__close:hover { color: var(--text); background: var(--surface-2); }
+
+/* Overlay — only shown on mobile via JS toggle */
+.sidebar-overlay { display: none; }
+
 /* ── Mobile (≤768px) ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* App: single column — sidebar becomes a fixed drawer, main fills viewport */
@@ -85,7 +122,7 @@ button { font-family: inherit; }
   .dashboard { display: none !important; }
   .main { border: none; min-width: 0; }
 
-  /* Sidebar drawer */
+  /* Sidebar drawer — position: fixed removes it from grid flow */
   .sidebar {
     position: fixed;
     top: 0; left: 0;
@@ -207,44 +244,6 @@ button { font-family: inherit; }
   overflow-y: auto;
   border-right: 0;
 }
-/* Hamburger — hidden on desktop, shown on mobile via media query */
-.hamburger {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 34px; height: 34px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  cursor: pointer;
-  font-size: 15px;
-  flex-shrink: 0;
-  color: var(--text);
-  transition: background .12s;
-}
-.hamburger:hover { background: var(--surface-2); }
-
-/* Sidebar close button — hidden on desktop */
-.sidebar__close {
-  display: none;
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 28px; height: 28px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--text-dim);
-}
-.sidebar__close:hover { color: var(--text); background: var(--surface-2); }
-
-.sidebar { position: relative; }
-
-.sidebar-overlay { display: none; }
-
 .sidebar__brand {
   display: flex;
   align-items: center;
