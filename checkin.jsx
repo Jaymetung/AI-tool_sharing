@@ -30,6 +30,13 @@ function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserI
   const upcomingCount = myToday.filter((b) => liveStatus(b) === "upcoming").length;
   const activeCount = myToday.filter((b) => liveStatus(b) === "active").length;
 
+  if (!me) return (
+    <section className="checkin">
+      <div className="checkin__head"><h3 className="checkin__title"><span className="checkin__title-ic">⊙</span> 報到打卡</h3></div>
+      <div className="checkin__empty"><div className="checkin__empty-ic">👤</div><div>目前沒有使用者</div></div>
+    </section>
+  );
+
   return (
     <section className="checkin">
       <div className="checkin__head">
