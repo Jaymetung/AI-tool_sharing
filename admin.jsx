@@ -45,6 +45,7 @@ function AdminPanel({ tools, users, bookings = [], initialTab, onClose, onSaveTo
         <div className="admin-tabs">
           <button className={tab === "tool" ? "is-on" : ""} onClick={() => setTab("tool")}>AI 工具</button>
           <button className={tab === "user" ? "is-on" : ""} onClick={() => setTab("user")}>使用者</button>
+          <button className={tab === "pwd"  ? "is-on" : ""} onClick={() => setTab("pwd")}>🔑 密碼</button>
         </div>
 
         <div className="admin-body">
@@ -62,6 +63,15 @@ function AdminPanel({ tools, users, bookings = [], initialTab, onClose, onSaveTo
                 </div>
               ))}
               <button className="admin-add" onClick={newTool}>＋ 新增工具</button>
+            </div>
+          )}
+
+          {tab === "pwd" && (
+            <div style={{ padding: '4px 0' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 16 }}>
+                更新後所有裝置的管理員密碼立即生效，目前已登入的 session 不會被登出。
+              </p>
+              <PasswordSettings onClose={onClose} />
             </div>
           )}
 
@@ -263,4 +273,93 @@ function UserEditor({ user, onSave, onClose }) {
   );
 }
 
+function PasswordGate({ adminPassword, onSuccess, onClose }) {
+  const [value, setValue] = React.useState('');
+  const [error, setError] = React.useState(false);
+
+  React.useEffect(() => {
+    const fn = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', fn);
+    return () => window.removeEventListener('keydown', fn);
+  }, [onClose]);
+
+  const submit = () => {
+    if (value === adminPassword) {
+      onSuccess();
+    } else {
+      setError(true);
+      setValue('');
+      setTimeout(() => setError(false), 800);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 340 }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal__header">
+          <div className="modal__title"><h2>🔐 管理員驗證</h2></div>
+          <button className="iconbtn" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal__body" style={{ gap: 16 }}>
+          <div className="field">
+            <label className="field__label">管理員密碼</label>
+            <input
+              className={`input${error ? ' input--error' : ''}`}
+              type="password"
+              placeholder="輸入密碼…"
+              value={value}
+              autoFocus
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submit()}
+            />
+            {error && <div style={{ color: '#ef4444', fontSize: 12, marginTop: 5 }}>密碼錯誤，請再試一次</div>}
+          </div>
+        </div>
+        <div className="modal__footer">
+          <div />
+          <div className="modal__actions">
+            <button className="btn btn--ghost" onClick={onClose}>取消</button>
+            <button className="btn btn--primary" onClick={submit}>確認</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PasswordSettings({ onClose }) {
+  const [current, setCurrent] = React.useState('');
+  const [next, setNext] = React.useState('');
+  const [confirm, setConfirm] = React.useState('');
+  const [msg, setMsg] = React.useState(null);
+
+  const save = () => {
+    if (!next.trim()) return setMsg({ ok: false, text: '新密碼不可為空' });
+    if (next !== confirm) return setMsg({ ok: false, text: '兩次輸入的密碼不一致' });
+    fbSaveConfig({ adminPassword: next });
+    setMsg({ ok: true, text: '密碼已更新' });
+    setCurrent(''); setNext(''); setConfirm('');
+    setTimeout(onClose, 800);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="field">
+        <label className="field__label">新密碼 <span className="field__req">必填</span></label>
+        <input className="input" type="password" placeholder="輸入新密碼" value={next} onChange={(e) => setNext(e.target.value)} />
+      </div>
+      <div className="field">
+        <label className="field__label">確認新密碼</label>
+        <input className="input" type="password" placeholder="再次輸入新密碼" value={confirm} onChange={(e) => setConfirm(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && save()} />
+      </div>
+      {msg && <div style={{ fontSize: 12, color: msg.ok ? '#0b8a3a' : '#ef4444' }}>{msg.text}</div>}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn--primary" onClick={save} disabled={!next || !confirm}>更新密碼</button>
+      </div>
+    </div>
+  );
+}
+
 window.AdminPanel = AdminPanel;
+window.PasswordGate = PasswordGate;
