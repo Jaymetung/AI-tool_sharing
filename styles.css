@@ -2697,3 +2697,19 @@ button.cal-month__more:hover { color: var(--accent); background: var(--surface-2
 /* field helpers shared by modal + admin editors */
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 480px) { .field-grid { grid-template-columns: 1fr; } }
+
+/* seat capacity warning in booking modal */
+.field-warn {
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  background: color-mix(in oklab, #eab308 12%, white);
+  border: 1px solid color-mix(in oklab, #eab308 30%, white);
+  color: #854d0e;
+}
+.field-warn--over {
+  background: color-mix(in oklab, #ef4444 10%, white);
+  border-color: color-mix(in oklab, #ef4444 25%, white);
+  color: #991b1b;
+}
