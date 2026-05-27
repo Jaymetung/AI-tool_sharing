@@ -143,11 +143,9 @@ function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserI
         )}
       </div>
 
-      {onCreate && (
-        <button className="checkin__add" onClick={onCreate}>
-          <span className="btn__plus">＋</span> 新增預約
-        </button>
-      )}
+      <button className="checkin__add" onClick={onCreate}>
+        <span className="btn__plus">＋</span> 新增預約
+      </button>
     </section>
   );
 }
