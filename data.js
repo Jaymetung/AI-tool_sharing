@@ -37,7 +37,10 @@ const USE_STATUS = {
 
 // --- bookings ---
 // Build a month of bookings around "today" (we lock "today" to a fixed date so the demo is stable).
-const TODAY = new Date(2026, 4, 25); // 2026-05-25 (month is 0-indexed)
+// Get today's date in Taiwan time (UTC+8), regardless of browser timezone
+const _twStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+const [_ty, _tm, _td] = _twStr.split('-').map(Number);
+const TODAY = new Date(_ty, _tm - 1, _td);
 const pad = (n) => String(n).padStart(2, "0");
 const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const dateOffset = (days) => {
