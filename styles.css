@@ -2698,6 +2698,17 @@ button.cal-month__more:hover { color: var(--accent); background: var(--surface-2
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 480px) { .field-grid { grid-template-columns: 1fr; } }
 
+/* password gate error shake */
+.input--error {
+  border-color: #ef4444 !important;
+  animation: shake 0.35s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+}
+
 /* seat capacity warning in booking modal */
 .field-warn {
   padding: 8px 12px;
