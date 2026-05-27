@@ -2,7 +2,7 @@
 // Lists "me" + today's bookings; check-in toggles a manualState flag
 // that overrides the time-derived useStatus on the calendar.
 
-function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserId, setCurrentUserId, onCheckIn, onCheckOut }) {
+function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserId, setCurrentUserId, onCheckIn, onCheckOut, onCreate }) {
   const me = users.find((u) => u.id === currentUserId);
   const todayKey = window.AI_DATA.ymd(today);
   const myToday = bookings
@@ -113,6 +113,12 @@ function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserI
                     {status === "active"   && <span className="ci-item__chip is-act"><span className="dot-pulse" /> 使用中</span>}
                     {status === "done"     && <span className="ci-item__chip is-done">已結束</span>}
                   </div>
+                  {(b.checkInTime || b.checkOutTime) && (
+                    <div className="ci-item__actual">
+                      {b.checkInTime  && <span>↑ {b.checkInTime} 打卡</span>}
+                      {b.checkOutTime && <span>↓ {b.checkOutTime} 結束</span>}
+                    </div>
+                  )}
                 </div>
                 {!isDone && (
                   <button
@@ -136,6 +142,12 @@ function CheckInPanel({ users, tools, bookings, today, currentHour, currentUserI
           })
         )}
       </div>
+
+      {onCreate && (
+        <button className="checkin__add" onClick={onCreate}>
+          <span className="btn__plus">＋</span> 新增預約
+        </button>
+      )}
     </section>
   );
 }
