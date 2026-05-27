@@ -211,9 +211,6 @@ function App() {
               </div>
             )}
             <button className="btn btn--ghost btn--sm" onClick={() => adminAuthed ? setAdminModal("tool") : setAdminGate(true)} title="管理工具與使用者">⚙ 管理</button>
-            <button className="btn btn--primary" onClick={() => onCreate(window.AI_DATA.ymd(TODAY), 10)}>
-              <span className="btn__plus">＋</span> 新增預約
-            </button>
           </div>
         </header>
 
