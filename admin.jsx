@@ -12,7 +12,7 @@ function makesoft(hex) {
 const TOOL_GLYPHS  = ["◉","✦","◐","◆","❖","◈","▶","♪","★","●","▲","■","⬟","⬡","✿","⊕"];
 const TOOL_COLORS  = ["#10a37f","#d97757","#1a73e8","#7c3aed","#24292f","#22c55e","#ec4899","#4f46e5","#f59e0b","#ef4444","#06b6d4","#0b8a3a","#9333ea","#e11d48","#0284c7","#0b1220"];
 
-function AdminPanel({ tools, users, initialTab, onClose, onSaveTool, onDeleteTool, onSaveUser, onDeleteUser }) {
+function AdminPanel({ tools, users, bookings = [], initialTab, onClose, onSaveTool, onDeleteTool, onSaveUser, onDeleteUser }) {
   const [tab, setTab] = React.useState(initialTab || "tool");
   const [editingTool, setEditingTool] = React.useState(null);
   const [editingUser, setEditingUser] = React.useState(null);
@@ -100,18 +100,27 @@ function AdminPanel({ tools, users, initialTab, onClose, onSaveTool, onDeleteToo
         />
       )}
 
-      {confirm && (
+      {confirm && (() => {
+        const affectedBookings = bookings.filter((b) =>
+          confirm.type === "tool" ? b.toolId === confirm.id : b.userId === confirm.id
+        ).filter((b) => b.resStatus !== "cancelled");
+        return (
         <div className="modal-backdrop" style={{ zIndex: 200 }} onClick={() => setConfirm(null)}>
           <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="confirm-dialog__msg">確定刪除「{confirm.label}」？</div>
-            <div className="confirm-dialog__sub">此操作無法復原</div>
+            <div className="confirm-dialog__sub">
+              {affectedBookings.length > 0
+                ? `此操作無法復原。將影響 ${affectedBookings.length} 筆現有預約（預約紀錄不會自動刪除）。`
+                : "此操作無法復原"}
+            </div>
             <div className="confirm-dialog__actions">
               <button className="btn btn--ghost" onClick={() => setConfirm(null)}>取消</button>
               <button className="btn btn--danger" onClick={doDelete}>刪除</button>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
