@@ -2,9 +2,9 @@
 //   預約狀態, 使用狀態, 使用者, 使用工具
 // Also supports hour-range or full-day mode.
 
-const { useState, useEffect } = React;
+const { useState, useEffect, useMemo: useMemo4 } = React;
 
-function BookingModal({ booking, defaultDate, defaultHour, defaultToolId, tools, users, onClose, onSave, onDelete }) {
+function BookingModal({ booking, defaultDate, defaultHour, defaultToolId, tools, users, bookings = [], onClose, onSave, onDelete }) {
   const isEdit = !!booking;
   const [date, setDate] = useState(booking?.date || defaultDate || window.AI_DATA.ymd(window.AI_DATA.TODAY));
   const [mode, setMode] = useState(() => {
@@ -28,12 +28,27 @@ function BookingModal({ booking, defaultDate, defaultHour, defaultToolId, tools,
   const tool = tools.find((t) => t.id === toolId);
   const user = users.find((u) => u.id === userId);
 
+  // Count overlapping confirmed bookings for the same tool/date/time (excluding self)
+  const conflictCount = useMemo4(() => {
+    const sh = mode === "day" ? 9 : startHour;
+    const eh = mode === "day" ? 18 : endHour;
+    return bookings.filter((b) =>
+      b.id !== booking?.id &&
+      b.toolId === toolId &&
+      b.date === date &&
+      b.resStatus !== "cancelled" &&
+      b.startHour < eh && b.endHour > sh
+    ).length;
+  }, [bookings, toolId, date, mode, startHour, endHour, booking]);
+
+  const overCapacity = tool && conflictCount >= tool.seats;
+
   const save = () => {
     const sh = mode === "day" ? 9 : startHour;
     const eh = mode === "day" ? 18 : endHour;
     if (eh <= sh) return;
     onSave({
-      id: booking?.id || `b${Date.now()}`,
+      id: booking?.id || `b${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
       date, startHour: sh, endHour: eh,
       toolId, userId, resStatus, useStatus, note,
     });
@@ -90,6 +105,15 @@ function BookingModal({ booking, defaultDate, defaultHour, defaultToolId, tools,
               </div>
             </div>
           </div>
+
+          {/* Seat capacity warning */}
+          {tool && conflictCount > 0 && (
+            <div className={`field-warn ${overCapacity ? "field-warn--over" : ""}`}>
+              {overCapacity
+                ? `⚠ 此時段已滿（${conflictCount}/${tool.seats} 席），仍可建立待確認預約`
+                : `ℹ 此時段已有 ${conflictCount}/${tool.seats} 席被使用`}
+            </div>
+          )}
 
           {/* Time */}
           <div className="field">
