@@ -3,7 +3,7 @@
 
 const { useMemo: useMemo2 } = React;
 
-function FilterSidebar({ tools, users, filters, setFilters, today, topContent }) {
+function FilterSidebar({ tools, users, filters, setFilters, today, topContent, isOpen, onClose }) {
   const toggleTool = (id) => {
     const next = new Set(filters.tools);
     next.has(id) ? next.delete(id) : next.add(id);
@@ -18,7 +18,8 @@ function FilterSidebar({ tools, users, filters, setFilters, today, topContent })
   const allUsersOn = filters.users.size === users.length;
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${isOpen ? " is-open" : ""}`}>
+      <button className="sidebar__close" onClick={onClose} aria-label="關閉篩選">✕</button>
       <div className="sidebar__brand">
         <div className="sidebar__logo">
           <span className="logo-mark">◐</span>
