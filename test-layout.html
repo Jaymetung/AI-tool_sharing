@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Layout Test</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Fill cells so we can see the grid */
+    .cal-month__cell { background: var(--surface); }
+    .cal-month__cell:nth-child(odd) { background: var(--surface-2,#f3f2ee); }
+  </style>
+</head>
+<body>
+<div id="root">
+<div class="app density-comfortable no-dash" style="--accent:#4f46e5">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar__close" onclick="closeSidebar()">✕</button>
+    <div class="sidebar__brand">
+      <div class="sidebar__logo"><span class="logo-mark">◐</span></div>
+      <div>
+        <div class="sidebar__title">AI 工具預約</div>
+        <div class="sidebar__sub">團隊 · 共 8 個工具</div>
+      </div>
+    </div>
+    <section class="filter">
+      <div class="filter__head"><h3>AI 工具</h3><button class="filter__all">全選</button></div>
+      <div class="filter__list">
+        <label class="filter__item is-on"><input type="checkbox" checked /><span class="filter__swatch" style="background:#10a37f"/><span class="filter__name">ChatGPT Team</span><span class="filter__count">3</span></label>
+        <label class="filter__item is-on"><input type="checkbox" checked /><span class="filter__swatch" style="background:#d97757"/><span class="filter__name">Claude Pro</span><span class="filter__count">2</span></label>
+        <label class="filter__item"><input type="checkbox" /><span class="filter__swatch" style="background:#1a73e8"/><span class="filter__name">Gemini Advanced</span><span class="filter__count">1</span></label>
+      </div>
+    </section>
+    <section class="filter">
+      <div class="filter__head"><h3>使用者</h3><button class="filter__all">全選</button></div>
+      <div class="filter__list">
+        <label class="filter__item is-on"><input type="checkbox" checked /><span class="filter__avatar" style="background:#8b887e">陳</span><span class="filter__name">陳怡君</span><span class="filter__role">產品設計</span></label>
+        <label class="filter__item is-on"><input type="checkbox" checked /><span class="filter__avatar" style="background:#8b887e">林</span><span class="filter__name">林宗翰</span><span class="filter__role">工程</span></label>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="hamburger" onclick="openSidebar()">☰</button>
+        <div class="mode-tabs">
+          <button class="is-on"><span class="mode-tabs__ic">▦</span> 月曆</button>
+          <button><span class="mode-tabs__ic">◧</span> 統計</button>
+        </div>
+        <span class="topbar__divider"></span>
+        <button class="iconbtn">‹</button>
+        <button class="iconbtn">›</button>
+        <button class="btn btn--ghost btn--sm">今天</button>
+        <h1 class="topbar__title">2026 年 5 月</h1>
+      </div>
+      <div class="topbar__center">
+        <div class="search">
+          <span class="search__ic">⌕</span>
+          <input class="search__inp" placeholder="搜尋預約備註、工具、使用者…" />
+        </div>
+      </div>
+      <div class="topbar__right">
+        <div class="seg">
+          <button class="is-on">月</button>
+          <button>週</button>
+        </div>
+        <button class="btn btn--ghost btn--sm">⚙ 管理</button>
+        <button class="btn btn--primary"><span class="btn__plus">＋</span> 新增預約</button>
+      </div>
+    </header>
+
+    <!-- Calendar month -->
+    <div class="cal-wrap">
+      <div class="cal-month">
+        <div class="cal-month__head">
+          <div class="cal-month__hday">日</div><div class="cal-month__hday">一</div>
+          <div class="cal-month__hday">二</div><div class="cal-month__hday">三</div>
+          <div class="cal-month__hday">四</div><div class="cal-month__hday">五</div>
+          <div class="cal-month__hday">六</div>
+        </div>
+        <div class="cal-month__grid">
+          <!-- 5 rows × 7 cols = 35 cells -->
+          <div class="cal-month__cell"><div class="cal-month__num">27</div>
+            <div class="mchip is-active" style="--c:#10a37f;--s:#e9f6f1"><span class="mchip__dot"></span><span class="mchip__logo">◉</span><span class="mchip__name">GPT</span></div>
+          </div>
+          <div class="cal-month__cell"><div class="cal-month__num">28</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">29</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">30</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">1</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">2</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">3</div></div>
+
+          <div class="cal-month__cell"><div class="cal-month__num">4</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">5</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">6</div>
+            <div class="mchip" style="--c:#d97757;--s:#faece4"><span class="mchip__dot"></span><span class="mchip__logo">✦</span><span class="mchip__name">CLA</span></div>
+            <div class="mchip" style="--c:#1a73e8;--s:#e6efff"><span class="mchip__dot"></span><span class="mchip__logo">◆</span><span class="mchip__name">GEM</span></div>
+          </div>
+          <div class="cal-month__cell"><div class="cal-month__num">7</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">8</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">9</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">10</div></div>
+
+          <div class="cal-month__cell"><div class="cal-month__num">11</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">12</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">13</div></div>
+          <div class="cal-month__cell is-today"><div class="cal-month__num cal-month__num--today">25</div>
+            <div class="mchip is-active" style="--c:#0b8a3a;--s:#e6f7ec"><span class="mchip__dot"></span><span class="mchip__logo">◉</span><span class="mchip__name">GPT</span></div>
+          </div>
+          <div class="cal-month__cell"><div class="cal-month__num">26</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">27</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">28</div></div>
+
+          <div class="cal-month__cell"><div class="cal-month__num">18</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">19</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">20</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">21</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">22</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">23</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">24</div></div>
+
+          <div class="cal-month__cell"><div class="cal-month__num">25</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">26</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">27</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">28</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">29</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">30</div></div>
+          <div class="cal-month__cell"><div class="cal-month__num">31</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend__group">
+        <span class="legend__lbl">月曆色：</span>
+        <span class="legend__item"><span class="legend__dot" style="background:#0d8a36"></span>使用中</span>
+        <span class="legend__item"><span class="legend__dot" style="background:#1e6cff"></span>未使用</span>
+        <span class="legend__item"><span class="legend__dot" style="background:#b97309"></span>已預約</span>
+      </div>
+      <div class="legend__group" style="margin-left:auto">
+        <span class="legend__lbl">模擬時刻</span>
+        <input type="range" min="9" max="18" value="14" class="hour-slider" />
+        <span class="legend__hour">14:00</span>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('is-open');
+  document.getElementById('overlay').style.display = 'block';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('is-open');
+  document.getElementById('overlay').style.display = 'none';
+}
+</script>
+</body>
+</html>
