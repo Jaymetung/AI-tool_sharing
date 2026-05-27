@@ -77,13 +77,13 @@ button { font-family: inherit; }
 
 /* ── Mobile (≤768px) ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* App: single column — sidebar becomes a drawer */
+  /* App: single column — sidebar becomes a fixed drawer, main fills viewport */
   .app, .app:not(.no-dash), .app.no-dash {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: minmax(0, 100dvh);
   }
   .dashboard { display: none !important; }
-  .main { border: none; }
+  .main { border: none; min-width: 0; }
 
   /* Sidebar drawer */
   .sidebar {
