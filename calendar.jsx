@@ -96,7 +96,7 @@ function MonthView({ date, bookings, tools, users, today, onCreate, onSelectBook
             <div
               key={i}
               className={`cal-month__cell ${inMonth ? "" : "is-out"} ${isToday ? "is-today" : ""} ${hover && hover.key === key ? "is-hover" : ""}`}
-              onClick={(e) => { if (e.target === e.currentTarget) onCreate(key); }}
+              onClick={(e) => { if (e.target === e.currentTarget) isToday ? onOpenDay && onOpenDay(key) : onCreate(key); }}
               onMouseEnter={(e) => enterCell(key, list.length, e)}
               onMouseLeave={scheduleDismiss}
             >
